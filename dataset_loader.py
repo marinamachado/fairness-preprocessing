@@ -4,18 +4,8 @@ from aif360.datasets import AdultDataset, GermanDataset, CompasDataset, BankData
 
 class datasets_loader:
 
-    #teste
+
     dataset = None
-
-
-    def default_preprocessing(df):
-        """Adds a derived sex attribute based on personal_status."""
-        # TODO: ignores the value of privileged_classes for 'sex'
-        status_map = {'A91': 'male', 'A93': 'male', 'A94': 'male',
-                    'A92': 'female', 'A95': 'female'}
-        df['sex'] = df['personal_status'].replace(status_map)
-
-        return df
 
     #Genero
     def load_german_dataset(self):
@@ -37,7 +27,7 @@ class datasets_loader:
                      'savings', 'employment', 'other_debtors', 'property',
                      'installment_plans', 'housing', 'skill_level', 'telephone',
                      'foreign_worker'],
-        metadata=default_mappings,custom_preprocessing=default_preprocessing
+        metadata=default_mappings
         )
 
 
