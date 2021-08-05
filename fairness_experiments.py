@@ -7,10 +7,6 @@ import time
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import StratifiedKFold
 
-# algoritmos de classificação
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-
 # medidas de desempenho
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score, confusion_matrix
 from aif360.sklearn.metrics import generalized_fpr, selection_rate
@@ -173,7 +169,7 @@ class Experiment:
     
     def export_report(self, relative_path='', complement_name=''):
         filename = 'rep_' + self.dataset_name + '_' + self.preprocessing_name + '_' + complement_name + '.csv'
-        self.report.to_csv(relative_path + filename, sep=';')
+        self.report.to_csv(relative_path + filename, sep=';', index=False)
         
     def execute(self, X, y):
         
