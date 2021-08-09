@@ -91,7 +91,7 @@ def convert_index(l, privileged_group):
 convert_index = np.vectorize(convert_index)
 
 
-def kfold(clf, X, y, k=10):
+def kfold(clf, X, y, weights, k=10):
     ''' Função que realiza o kfold estratificado e retorna a média de medidas de desempenho
     '''
     
@@ -111,7 +111,10 @@ def kfold(clf, X, y, k=10):
         y_train, y_test = y.iloc[train_index], y.iloc[test_index]
         
         # Treina o classificador
-        clf.fit(x_train, y_train['target'])
+        if weights is None:
+            clf.fit(x_train, y_train['target'])
+        else:
+            clf.fit(x_train, y_train['target'], weights[train_index])
         # Realiza as predições
         y_predict = clf.predict(x_test)
         
@@ -171,10 +174,13 @@ class Experiment:
         filename = 'rep_' + self.dataset_name + '_' + self.preprocessing_name + '_' + complement_name + '.csv'
         self.report.to_csv(relative_path + filename, sep=';', index=False)
         
-    def execute(self, X, y):
+    def execute(self, X, y, weights=None):
         
         # transforma os indices do y para ficar compatível com o AIF360
         y = pd.DataFrame(y, columns=['target'])
+        
+        if not weights is None:
+            weights = np.array(weights)
         
         # verifica se o grupo privilegiado está contido nos indices (se não estiver gera exceção)
         if isinstance(X.index, pd.MultiIndex):
@@ -204,7 +210,7 @@ class Experiment:
                 clf = Classifier(**params)
                 
                 # realiza o kfold
-                result = kfold(clf, X, y)
+                result = kfold(clf, X, y, weights)
                 
                 # salva o resultado no relatório
                 self.report.loc[self.counter] = [self.dataset_name, self.preprocessing_name, clf_type, str(params)] + list(result)

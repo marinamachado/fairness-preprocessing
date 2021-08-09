@@ -17,11 +17,16 @@ classifiers_settings_test = {
           {'n_estimators' : np.arange(120, 220, 20)}],
     'Naive Bayes': [GaussianNB, {}],
     'Decision Tree' : [DecisionTreeClassifier,
-          {'criterion' : ['gini', 'entropy'], 'splitter' : ['best', 'random']}],
-    'XGBoost' : [XGBClassifier,
-                {'objective': ['binary:logistic']}],
-    'MLP' : [MLPClassifier,
-            {'hidden_layer_sizes' : hidden_layer, 'max_iter': [5000]}]
+          {'criterion' : ['gini', 'entropy'], 'splitter' : ['best', 'random']}]
+}
+
+# é o mesmo, mas só pra diferenciar
+classifiers_settings_test_weights = {
+    'Random Forest': [RandomForestClassifier,
+          {'n_estimators' : np.arange(120, 220, 20)}],
+    'Naive Bayes': [GaussianNB, {}],
+    'Decision Tree' : [DecisionTreeClassifier,
+          {'criterion' : ['gini', 'entropy'], 'splitter' : ['best', 'random']}]
 }
 
 classifiers_settings_eniac = {
