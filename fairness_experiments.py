@@ -12,14 +12,15 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_s
 from aif360.sklearn.metrics import generalized_fpr, selection_rate
 
 # medidas de fairness
-from aif360.sklearn.metrics import difference, statistical_parity_difference, disparate_impact_ratio, average_odds_difference, equal_opportunity_difference
+from aif360.sklearn.metrics import difference, statistical_parity_difference, disparate_impact_ratio, average_odds_difference, equal_opportunity_difference, theil_index, coefficient_of_variation
 
 # tela
 from IPython.display import clear_output
 
 measures_columns = ['accuracy', 'dif_accuracy', 'balanced_accuracy', 'dif_balanced_accuracy', 'recall', 'dif_recall', 
                     'precision', 'dif_precision', 'fpr', 'dif_fpr', 'selection_rate', 'dif_selection_rate', 
-                    'dif_statistical_parity', 'dif_equal_opp', 'dif_avg_odds', 'disparate_impacto_ratio']
+                    'dif_statistical_parity', 'dif_equal_opp', 'dif_avg_odds', 'disparate_impacto_ratio', 'theil_index',
+                    'coef_variation']
 
 def fpr_score(y, y_pred):
     tn, fp, fn, tp = confusion_matrix(y, y_pred).ravel()
@@ -46,6 +47,15 @@ fairness_measures = {
     'dif_avg_odds' : average_odds_difference, 
     'disparate_impacto_ratio' : disparate_impact_ratio
 }
+
+individual_fairness_measures = {
+    'theil_index' : theil_index,
+    'coef_variation' : coefficient_of_variation 
+}
+
+def array_to_entropy(y_true, y_predict):
+    ''' Cálculo do valor do beneficio de uma predição individual (necessário individual fairness) '''
+    return y_predict - y_true + 1
 
 def concat_results(*, relative_dir='', file_format='.csv', sep=';'):
     ''' Função que concatena aqruivos do tipo .csv em um mesmo frame.
@@ -128,7 +138,12 @@ def kfold(clf, X, y, weights, k=10):
             if isinstance(measure, list):
                 results.loc[i, name] =  abs(measure[0](measure[1], y_test, y_predict, prot_attr='group', priv_group=1))
             else:
-                results.loc[i, name] = abs(measure(y_test, y_predict, prot_attr='group', priv_group=1))     
+                results.loc[i, name] = abs(measure(y_test, y_predict, prot_attr='group', priv_group=1))
+        # Calcula as medidas de individual fairness
+        ''' cria o vetor de ganho para o cálculo do theil index e coeficiente de variação '''
+        b = array_to_entropy(y_test['target'], y_predict)
+        for name, measure in individual_fairness_measures.items():
+            results.loc[i, name] = measure(b)
                     
             
     # retorna o resultado como sendo a média de todas iterações
