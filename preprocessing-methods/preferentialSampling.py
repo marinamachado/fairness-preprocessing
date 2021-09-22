@@ -46,7 +46,6 @@ class PreferentialSampling( BaseEstimator, TransformerMixin ):
             
             change = grupo['to_change']
             
-            print(li)
             
             if(change < 0):
                 
@@ -109,7 +108,7 @@ class PreferentialSampling( BaseEstimator, TransformerMixin ):
 
                 if(grupo['label'] == 1):
                     X = X.sort_values('positive_probability', ascending = True)
-                    new_lines = X[(X[self.attr]==li['attr'])  & (X[self.label]==li['label'])].iloc[:new_size].index
+                    new_lines = X[(X[self.attr]==grupo['attr'])  & (X[self.label]==grupo['label'])].iloc[:new_size].index
                     new_df = new_df.drop(new_lines)
 
                 elif(grupo['label'] == 0):
@@ -117,9 +116,7 @@ class PreferentialSampling( BaseEstimator, TransformerMixin ):
                     new_lines = X[(X[self.attr]==grupo['attr'])  & (X[self.label]==grupo['label'])].iloc[:new_size].index
                     new_df = new_df.drop(new_lines)
                 new_df = new_df.reset_index(drop = True)
-                
-            l = new_df[(new_df[self.attr]==grupo['attr']) & (new_df[self.label]==grupo['label'])]
-            print(len(l))
+
                 
             
         return new_df
