@@ -6,6 +6,7 @@ import time
 # seleção de modelos
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import LabelEncoder
 
 # medidas de desempenho
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score, confusion_matrix
@@ -100,13 +101,46 @@ def convert_index(l, privileged_group):
 '''
 convert_index = np.vectorize(convert_index)
 
+''' Métodos de Estratificação '''
+class _StratifiedBy():
+    """
+    Classe com os métodos possíveis de estratificação
+    """
 
-def kfold(clf, X, y, weights, k=10):
+    @staticmethod
+    def target(x, y):
+        """
+        Estratificação pelo valor de y (classe)
+        """
+        return y['target'].to_numpy()
+
+    @staticmethod
+    def group(x, y):
+        """
+        Estratificação pelo grupo protegido
+        """
+        return y.index.to_numpy()
+
+    @staticmethod
+    def group_target(x, y):
+        """
+        Estratificação por grupo protegido e classe
+        """
+        groups = _StratifiedBy.group(x, y)
+        targets = _StratifiedBy.target(x, y)
+        group_target = [str(group) + str(target) for group, target in zip(groups, targets)]
+        return LabelEncoder().fit_transform(group_target)
+
+
+def kfold(clf, X, y, weights, k=10, stratified_by='group_target'):
     ''' Função que realiza o kfold estratificado e retorna a média de medidas de desempenho
     '''
     
     # instancia o KFold estratificado (sem utilizar todos os parametros)
     kf = StratifiedKFold(n_splits=k)
+    
+    # verifica qual o tipo de estratificação (as opções são: target, group e group_target)
+    by = getattr(_StratifiedBy, stratified_by)(X, y)
     
     # inicia um DataFrame para salvar os resultados 
     # (colunas são as medidas que irão no relatório (neste caso só tem acurácia), 
@@ -114,7 +148,7 @@ def kfold(clf, X, y, weights, k=10):
     results = pd.DataFrame(index=np.arange(k), columns=measures_columns)
 
     
-    for i, (train_index, test_index) in enumerate(kf.split(X, y)):
+    for i, (train_index, test_index) in enumerate(kf.split(X, by)):
         
         # Separa os conjuntos
         x_train, x_test = X.iloc[train_index], X.iloc[test_index]
